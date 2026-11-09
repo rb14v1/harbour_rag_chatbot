@@ -22,12 +22,21 @@ load_dotenv(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-y#h$f)x1q#26m)1j%!1j9)=&tey84pf4ur!rt8vor1(yq&jkut'
+REQUIRED_ENV_VARS = ['SECRET_KEY', 'DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASS']
+_missing_env = [name for name in REQUIRED_ENV_VARS if not os.environ.get(name)]
+if _missing_env:
+    raise RuntimeError(
+        'Missing required environment variables: ' + ', '.join(_missing_env)
+    )
+
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'false').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    h.strip() for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h.strip()
+]
 
 
 # Application definition
