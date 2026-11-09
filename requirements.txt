@@ -8,7 +8,7 @@ langchain-community>=0.2.4,<0.3
 langchain-huggingface>=0.0.3,<0.1
 accelerate>=0.31.0,<0.32
 langchain_postgres>=0.0.8,<0.1
-litellm==1.83.0
+litellm>=1.83.1
 sentence-transformers>=3.0.0
 tiktoken>=0.7.0,<0.8
 langchainhub>=0.1.20,<0.2
