@@ -42,6 +42,16 @@ The compose file defines named volumes for persisting data across container rest
 - `dev-nomic-data`: For caching GPT-4 model data used by the project service.
 - `dev-llama-data`: For caching AI model data used by the Ollama service.
 - `dev-db-data`: For persisting the database data.
+## Database backup and restore
+The `db-backup` service takes a daily `pg_dump` of the database into the `dev-db-backups` volume and keeps backups for 30 days (`BACKUP_KEEP_DAYS=30`).
+In production, the backup target must be in a separate region/storage account from the primary database (e.g. sync the backups volume to remote object storage), and PITR (WAL archiving or the managed-database equivalent) must be enabled.
+
+Restore procedure (test at least once before go-live):
+1. Stop the app: `docker compose stop project`.
+2. List backups: `docker compose run --rm db-backup ls /backups/daily`.
+3. Restore: `docker compose run --rm db-backup sh -c "zcat /backups/last/devdb-latest.sql.gz | psql -h db -U devuser -d devdb"`.
+4. Start the app: `docker compose start project` and verify data.
+
 ## Build and start
 To run this project locally:
 1. Ensure Docker and Docker Compose are installed on your system.
