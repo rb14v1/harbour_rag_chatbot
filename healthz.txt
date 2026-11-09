@@ -1,0 +1,2 @@
+Add a GET /healthz endpoint to harbour_chatbot that returns HTTP 200.
+Runtime detected: Node.js
