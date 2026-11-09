@@ -1,6 +1,11 @@
 import { ChatMessage } from "./types";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const API_URL = process.env.REACT_APP_API_URL;
+if (!API_URL) {
+  throw new Error(
+    "Missing required environment variable REACT_APP_API_URL (see .env.example)"
+  );
+}
 const TOKEN_KEY = "authToken";
 
 export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
