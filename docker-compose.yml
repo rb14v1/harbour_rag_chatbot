@@ -17,9 +17,6 @@ services:
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     environment:
-      - SECRET_KEY=${SECRET_KEY}
-      - DEBUG=${DEBUG:-true}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
       - DB_HOST=db
       - DB_NAME=devdb
       - DB_USER=devuser
@@ -63,7 +60,24 @@ services:
       - POSTGRES_USER=devuser
       - POSTGRES_PASSWORD=changeme
 
+  db-backup:
+    image: prodrigestivill/postgres-backup-local:16
+    depends_on:
+      - db
+    volumes:
+      - dev-db-backups:/backups
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=changeme
+      - SCHEDULE=@daily
+      - BACKUP_KEEP_DAYS=30
+      - BACKUP_KEEP_WEEKS=5
+      - BACKUP_KEEP_MONTHS=6
+
 volumes:
+  dev-db-backups:
   dev-db-data:
   dev-static-data:
   dev-nomic-data:
