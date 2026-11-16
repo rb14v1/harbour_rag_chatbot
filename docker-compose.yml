@@ -55,6 +55,10 @@ services:
       - "5432:5432"
     volumes:
       - dev-db-data:/var/lib/postgresql/data
+      - dev-db-wal:/wal
+    command: >
+      postgres -c wal_level=replica -c archive_mode=on
+      -c "archive_command=test ! -f /wal/%f && cp %p /wal/%f"
     environment:
       - POSTGRES_DB=devdb
       - POSTGRES_USER=devuser
@@ -76,7 +80,26 @@ services:
       - BACKUP_KEEP_WEEKS=5
       - BACKUP_KEEP_MONTHS=6
 
+  # Copies backups and archived WAL to a separate storage account/region.
+  # Set BACKUP_OFFSITE_REMOTE (rclone remote:path) and the matching RCLONE_CONFIG_* variables.
+  db-backup-offsite:
+    image: rclone/rclone:latest
+    depends_on:
+      - db-backup
+    entrypoint: /bin/sh
+    command: >
+      -c "while true; do
+      rclone sync /backups $${BACKUP_OFFSITE_REMOTE}/dumps &&
+      rclone sync /wal $${BACKUP_OFFSITE_REMOTE}/wal;
+      sleep 86400; done"
+    volumes:
+      - dev-db-backups:/backups:ro
+      - dev-db-wal:/wal:ro
+    environment:
+      - BACKUP_OFFSITE_REMOTE=${BACKUP_OFFSITE_REMOTE}
+
 volumes:
+  dev-db-wal:
   dev-db-backups:
   dev-db-data:
   dev-static-data:
